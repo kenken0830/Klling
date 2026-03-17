@@ -1,4 +1,4 @@
-﻿import { generateKlingShotPlan } from './storyboard-tools.js';
+import { generateKlingShotPlan } from './storyboard-tools.js';
 
 const form = document.querySelector('#story-form');
 const mediaUploadInput = document.querySelector('#media-upload');
