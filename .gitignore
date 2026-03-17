@@ -1,0 +1,10 @@
+tmp/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+api-config.json
+.venv/
+node_modules/
+*.log

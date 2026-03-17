@@ -1,0 +1,342 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kling Storyboard UI</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Kling Script Storyboard</p>
+          <h1>動画の文法も拾いながら、台本とKling用ショット設計を組み立てる</h1>
+          <p class="hero-text">
+            使い方が分からなくても、ブラウザ上の順番どおりに押せば進むようにしました。
+            基本は「動画を選ぶ -> API を読む -> 全部作る」です。必要なら下の詳細設定でモデルやメモを上書きできます。
+          </p>
+        </div>
+        <div class="hero-card">
+          <p>最短手順</p>
+          <ol>
+            <li>動画か音声ファイルを選ぶ</li>
+            <li>「保存ファイルから読み込む」で API 設定を入れる</li>
+            <li>「アップロード動画から全部作る」を押す</li>
+            <li>右側の Shot table と Prompt pack を Kling に貼る</li>
+          </ol>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel form-panel">
+          <div class="panel-head">
+            <h2>入力</h2>
+            <p>上から順に進めれば動きます。迷ったら、まず動画を選んで API 設定を読み込んでから「全部作る」を押してください。</p>
+          </div>
+
+          <form id="story-form" class="story-form">
+            <article class="quickstart-card">
+              <div class="quickstart-head">
+                <span class="step-badge">Step 1</span>
+                <h3>動画か音声を入れる</h3>
+              </div>
+              <label>
+                使う動画 / 音声ファイル
+                <input
+                  type="file"
+                  id="media-upload"
+                  accept="audio/*,video/*,.mp3,.wav,.mp4,.m4a,.ogg,.flac,.webm,.mov,.mkv"
+                />
+              </label>
+              <div id="upload-status" class="inline-status">まだファイルは選ばれていません。</div>
+              <div class="actions compact-actions">
+                <button type="button" id="upload-media" class="ghost">ファイルをアップロード</button>
+                <button type="button" id="auto-run" class="primary">アップロード動画から全部作る</button>
+              </div>
+            </article>
+
+            <article class="quickstart-card">
+              <div class="quickstart-head">
+                <span class="step-badge">Step 2</span>
+                <h3>API を入れる</h3>
+              </div>
+              <div id="config-status" class="inline-status">まだ設定ファイルは読んでいません。</div>
+              <div class="actions compact-actions">
+                <button type="button" id="load-config" class="ghost">保存ファイルから読み込む</button>
+              </div>
+              <div class="api-grid compact-grid">
+                <label>
+                  エンドポイント
+                  <input type="url" name="endpoint" placeholder="https://api.openai.com" />
+                </label>
+                <label>
+                  生成モデル
+                  <input type="text" name="model" placeholder="gpt-4.1" />
+                </label>
+                <label>
+                  文字起こしモデル
+                  <input type="text" name="transcriptionModel" value="whisper-1" placeholder="例: whisper-1" />
+                </label>
+                <label>
+                  文字起こし言語
+                  <input type="text" name="transcriptionLanguage" value="ja" placeholder="ja / en" />
+                </label>
+                <label class="full-width">
+                  API キー
+                  <input type="password" name="apiKey" placeholder="sk-..." />
+                </label>
+              </div>
+              <p class="muted">文字起こしも AI 生成も、この API 設定を使います。</p>
+            </article>
+
+            <article class="quickstart-card">
+              <div class="quickstart-head">
+                <span class="step-badge">Step 3</span>
+                <h3>必要なら内容を補足する</h3>
+              </div>
+              <label>
+                タイトル
+                <input type="text" name="title" placeholder="例: 令嬢は契約結婚の夜に真実を知る" />
+              </label>
+
+              <label>
+                ストーリー案
+                <textarea
+                  name="idea"
+                  rows="5"
+                  placeholder="例: 婚約発表の夜、主人公は政略結婚だと思っていた相手から『最初から君を守るためだった』と告げられる。だが、彼のシャツには血がついていて..."
+                ></textarea>
+              </label>
+
+              <div class="grid two-col">
+                <label>
+                  スタイル
+                  <select name="styleProfile">
+                    <option value="live-action">実写メロドラマ</option>
+                    <option value="anime-glam">アニメ/ウェブトゥーン系</option>
+                    <option value="reference-driven">参考動画優先</option>
+                  </select>
+                </label>
+
+                <label>
+                  言語
+                  <select name="language">
+                    <option value="日本語">日本語</option>
+                    <option value="英語">英語</option>
+                    <option value="日本語セリフ + 英語プロンプト">日本語セリフ + 英語プロンプト</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="grid three-col">
+                <label>
+                  配信先
+                  <select name="platform">
+                    <option value="TikTok / Reels / Shorts">縦型ショート</option>
+                    <option value="YouTube">YouTube</option>
+                    <option value="Instagram Reels">Instagram Reels</option>
+                  </select>
+                </label>
+
+                <label>
+                  比率
+                  <select name="aspectRatio">
+                    <option value="9:16">9:16</option>
+                    <option value="16:9">16:9</option>
+                    <option value="1:1">1:1</option>
+                  </select>
+                </label>
+
+                <label>
+                  想定尺
+                  <select name="runtime">
+                    <option value="30">30秒前後</option>
+                    <option value="45">45秒前後</option>
+                    <option value="60">60秒前後</option>
+                    <option value="90">90秒前後</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                登場人物・小物のメモ
+                <textarea
+                  name="characters"
+                  rows="4"
+                  placeholder="例: 主人公 24歳 女性 / 白いドレス / 気が強い。相手役 29歳 男性 / ダークスーツ / 傷を隠している。小物: 婚約指輪、血のついたシャツ、スマホ。"
+                ></textarea>
+              </label>
+
+              <label>
+                参考動画の特徴メモ / 解析結果
+                <textarea
+                  name="referenceNotes"
+                  rows="4"
+                  placeholder="例: 2秒前後でカット、寄り多め、会話は切り返し、指輪やスマホのインサートを多用、暖色の室内、静かな push-in。"
+                ></textarea>
+              </label>
+
+              <label>
+                追加要望
+                <textarea
+                  name="extraNotes"
+                  rows="3"
+                  placeholder="例: 1話目の終わりはクリフハンガー。Kling は 1ショットずつ生成したい。セリフは短く。"
+                ></textarea>
+              </label>
+            </article>
+
+            <article class="quickstart-card">
+              <div class="quickstart-head">
+                <span class="step-badge">Step 4</span>
+                <h3>手動でも進められる</h3>
+              </div>
+              <label>
+                文字起こし / SRT
+                <textarea
+                  name="srtText"
+                  rows="9"
+                  placeholder="SRT を貼るか、全文テキストを貼ってください。文字起こし成功時はここに自動反映されます。"
+                ></textarea>
+              </label>
+
+              <div class="actions compact-actions">
+                <button type="button" id="transcribe-media" class="ghost">文字起こししてSRT化</button>
+                <button type="button" id="draft-shot-plan" class="ghost">SRTからKlingショット草案を作る</button>
+                <button type="submit" class="primary">生成パケットを作る</button>
+              </div>
+            </article>
+
+            <details class="api-box">
+              <summary>詳細設定（ローカルパス手入力 / 上書き）</summary>
+              <div class="grid two-col top-gap">
+                <label>
+                  参考動画のローカルパス
+                  <input type="text" name="referenceVideoPath" placeholder="例: ./samples/reference.mp4 または C:\videos\reference.mp4" />
+                </label>
+                <label>
+                  文字起こし対象のローカルパス
+                  <input type="text" name="transcriptionMediaPath" placeholder="空ならアップロード済みファイルを使います" />
+                </label>
+              </div>
+              <div class="grid three-col top-gap">
+                <label>
+                  最大文字数/行
+                  <input type="number" name="maxChars" min="6" max="40" value="18" />
+                </label>
+                <div></div>
+                <div class="actions compact-actions right-actions">
+                  <button type="button" id="analyze-video" class="ghost">動画を解析して反映</button>
+                  <button type="button" id="fill-demo" class="ghost">サンプル入力</button>
+                </div>
+              </div>
+            </details>
+          </form>
+        </section>
+
+        <section class="panel output-panel">
+          <div class="panel-head">
+            <h2>出力</h2>
+            <p>右側だけ見れば流れが追えるようにしています。上から順に確認してください。</p>
+          </div>
+
+          <div class="output-stack">
+            <article class="output-card">
+              <div class="output-head">
+                <h3>アップロード状態</h3>
+                <button type="button" class="copy-btn" data-copy-target="upload-report-output">コピー</button>
+              </div>
+              <textarea id="upload-report-output" rows="5" readonly placeholder="ここにアップロード済みファイル情報が出ます"></textarea>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <h3>動画解析メモ</h3>
+                <button type="button" class="copy-btn" data-copy-target="video-analysis-output">コピー</button>
+              </div>
+              <textarea id="video-analysis-output" rows="8" readonly placeholder="動画を解析すると、ここにストーリー理解用のメモが出ます"></textarea>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <h3>文字起こし結果</h3>
+                <button type="button" class="copy-btn" data-copy-target="transcription-output">コピー</button>
+              </div>
+              <textarea id="transcription-output" rows="12" readonly placeholder="ここに全文テキストと SRT が出ます"></textarea>
+            </article>
+
+            <article class="output-card emphasis-card">
+              <div class="output-head">
+                <h3>SRT から作った Kling ショット草案</h3>
+                <button type="button" class="copy-btn" data-copy-target="shot-draft-output">コピー</button>
+              </div>
+              <textarea id="shot-draft-output" rows="18" readonly placeholder="ここに Shot table と Prompt pack が出ます"></textarea>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <h3>画像プロンプト pack</h3>
+                <button type="button" class="copy-btn" data-copy-target="image-prompt-output">コピー</button>
+              </div>
+              <textarea id="image-prompt-output" rows="14" readonly placeholder="ここに静止画ベースの image prompt pack が出ます"></textarea>
+            </article>
+
+            <article class="output-card emphasis-card">
+              <div class="output-head">
+                <h3>ショット別プロンプトカード</h3>
+              </div>
+              <div id="shot-card-list" class="shot-card-list">
+                <p class="shot-card-empty">SRT から Kling ショット草案を作ると、ここに画像 prompt と Kling prompt のカードが 1ショットずつ出ます。</p>
+              </div>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <h3>Kling シーン連結 pack</h3>
+                <button type="button" class="copy-btn" data-copy-target="scene-chain-output">コピー</button>
+              </div>
+              <textarea id="scene-chain-output" rows="16" readonly placeholder="ここにシーン連結用の Kling pack が出ます"></textarea>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <h3>Web UI 用プロンプト</h3>
+                <button type="button" class="copy-btn" data-copy-target="prompt-output">コピー</button>
+              </div>
+              <textarea id="prompt-output" rows="14" readonly placeholder="ここに Web UI 用プロンプトが出ます"></textarea>
+            </article>
+            <article class="output-card">
+              <div class="output-head">
+                <h3>プロジェクト概要</h3>
+                <button type="button" class="copy-btn" data-copy-target="project-brief">コピー</button>
+              </div>
+              <textarea id="project-brief" rows="10" readonly placeholder="構成の要約と制作メモが出ます"></textarea>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <h3>Kling への貼り付け手順</h3>
+                <button type="button" class="copy-btn" data-copy-target="kling-steps">コピー</button>
+              </div>
+              <textarea id="kling-steps" rows="11" readonly placeholder="何をどこへ貼るかの手順が出ます"></textarea>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <h3>AI 生成結果</h3>
+                <button type="button" class="copy-btn" data-copy-target="ai-output">コピー</button>
+              </div>
+              <textarea id="ai-output" rows="18" readonly placeholder="API を設定すると、ここに台本と動画構成が出ます"></textarea>
+            </article>
+
+            <div id="status" class="status">待機中</div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
+
